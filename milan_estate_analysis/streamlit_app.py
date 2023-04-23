@@ -142,7 +142,7 @@ with st.container():
 
 # # FOURTH PLOT the MAP
 neighborhood = gpd.GeoDataFrame.from_file(
-    './milan_districts_modified.geojson')
+    'milan_estate_analysis/milan_districts_modified.geojson')
 
 filtered_df3 = nei_sale_rent[(nei_sale_rent['Year'] == selected_year3) &
                              (nei_sale_rent['Type'] == selected_type3) &
