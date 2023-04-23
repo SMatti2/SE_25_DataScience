@@ -23,35 +23,35 @@ st.write("""
 st.sidebar.title(('Filters for the Line Plots'))
 
 selected_neighborhood1 = st.sidebar.selectbox(
-    'Select a neighborhood', sorted(nei_sale_rent['Neighborhood'].unique()), key=f"nbh1')")
+    'Select a neighborhood', sorted(nei_sale_rent['Neighborhood'].unique()), key='nbh1')
 
 selected_type1 = st.sidebar.selectbox(
-    'Select a type', nei_sale_rent['Type'].unique(), key=f"type1')")
+    'Select a type', nei_sale_rent['Type'].unique(), key=f'type1')
 
 selected_status1 = st.sidebar.selectbox(
-    'Select a status', nei_sale_rent['Status'].unique(), key=f"status1')")
+    'Select a status', nei_sale_rent['Status'].unique(), key=f'status1')
 
 # Sidebar filters for the bar charts
 st.sidebar.title(('Filters for the Bar Charts'))
 
 selected_year2 = st.sidebar.selectbox(
-    'Select a year', sorted(nei_sale_rent['Year'].unique()), key=f"year2')")
+    'Select a year', sorted(nei_sale_rent['Year'].unique()), key=f'year2')
 
 selected_type2 = st.sidebar.selectbox(
-    'Select a type', nei_sale_rent['Type'].unique(), key=f"type2')")
+    'Select a type', nei_sale_rent['Type'].unique(), key=f'type2')
 
 selected_status2 = st.sidebar.selectbox(
-    'Select a status', nei_sale_rent['Status'].unique(), key=f"status2')")
+    'Select a status', nei_sale_rent['Status'].unique(), key=f'status2')
 
 # Sidebar filters for the map
 st.sidebar.title(('Filters for the Map'))
 
 selected_year3 = st.sidebar.selectbox(
-    'Select a year', sorted(nei_sale_rent['Year'].unique()), key=f"year3')")
+    'Select a year', sorted(nei_sale_rent['Year'].unique()), key=f'year3')
 selected_type3 = st.sidebar.selectbox(
-    'Select a type', nei_sale_rent['Type'].unique(), key=f"type3')")
+    'Select a type', nei_sale_rent['Type'].unique(), key=f'type3')
 selected_status3 = st.sidebar.selectbox(
-    'Select a status', nei_sale_rent['Status'].unique(), key=f"status3')")
+    'Select a status', nei_sale_rent['Status'].unique(), key=f'status3')
 
 
 # FIRST PLOT
