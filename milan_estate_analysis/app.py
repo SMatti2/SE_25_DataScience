@@ -1,3 +1,5 @@
+import os
+
 import folium
 import streamlit as st
 import pandas as pd
@@ -9,7 +11,9 @@ from streamlit_folium import folium_static
 import geopandas as gpd
 
 # Load data
-nei_sale_rent = pd.read_csv('./rent_sale_per_neighborhood.csv')
+file_path = os.path.join('.', 'rent_sale_per_neighborhood.csv')
+
+nei_sale_rent = pd.read_csv(file_path)
 
 st.write("""
 # Milan's Sale and Rent Prices
