@@ -11,7 +11,7 @@ from streamlit_folium import folium_static
 import geopandas as gpd
 
 # Load data
-nei_sale_rent = pd.read_csv(os.path.join(cwd, 'rent_sale_per_neighborhood.csv'))
+nei_sale_rent = pd.read_csv(os.path.join(os.getcwd(), 'rent_sale_per_neighborhood.csv'))
 
 st.write("""
 # Milan's Sale and Rent Prices
