@@ -12,10 +12,13 @@ from streamlit_folium import folium_static
 
 
 # Load data
-nei_sale_rent = pd.read_csv('milan_estate_analysis/rent_sale_per_neighborhood.csv')
+# nei_sale_rent = pd.read_csv(
+#     'milan_estate_analysis/rent_sale_per_neighborhood.csv')
+nei_sale_rent = pd.read_csv(
+    './rent_sale_per_neighborhood.csv')
 
 st.write("""
-# Milan's Sale and Rent Prices
+# Milan's Sale and Rent Prices Analysis
 
 """)
 
@@ -55,6 +58,8 @@ selected_type3 = st.sidebar.selectbox(
     'Select a type', nei_sale_rent['Type'].unique(), key=f'type3')
 selected_status3 = st.sidebar.selectbox(
     'Select a status', nei_sale_rent['Status'].unique(), key=f'status3')
+select_rent_sale = st.sidebar.selectbox(
+    'Select a rent or sale', ['Rent', 'Sale'], key=f'rent_sale')
 
 
 # FIRST PLOT
@@ -143,8 +148,16 @@ with st.container():
 
 
 # # FOURTH PLOT the MAP
+
+st.write(f"""
+    ### {select_rent_sale} Prices in {selected_year3}
+""")
+
+# Load the geojson file
+# neighborhood = gpd.GeoDataFrame.from_file(
+#     'milan_estate_analysis/milan_districts_modified.geojson')
 neighborhood = gpd.GeoDataFrame.from_file(
-    'milan_estate_analysis/milan_districts_modified.geojson')
+    './milan_districts_modified.geojson')
 
 filtered_df3 = nei_sale_rent[(nei_sale_rent['Year'] == selected_year3) &
                              (nei_sale_rent['Type'] == selected_type3) &
@@ -160,12 +173,16 @@ year_avg_rent_sale2.reset_index(inplace=True)
 # Create a map of the city of Milan
 m = folium.Map(location=[45.464664, 9.188540], zoom_start=12)
 
+if select_rent_sale == 'Rent':
+    map_columns = ['Neighborhood', 'Avg_Rent_Price']
+else:
+    map_columns = ['Neighborhood', 'Avg_Sale_Price']
 
 folium.Choropleth(
     geo_data=neighborhood,
     name='choropleth',
     data=year_avg_rent_sale2,
-    columns=['Neighborhood', 'Avg_Sale_Price'],
+    columns=map_columns,
     key_on='feature.properties.NIL',
     fill_color='YlGnBu',
     fill_opacity=0.7,
