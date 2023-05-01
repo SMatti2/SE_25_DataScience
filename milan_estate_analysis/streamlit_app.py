@@ -12,8 +12,8 @@ from streamlit_folium import folium_static
 
 
 # Load data
-# nei_sale_rent = pd.read_csv(
-#     'milan_estate_analysis/rent_sale_per_neighborhood.csv')
+nei_sale_rent = pd.read_csv(
+    'milan_estate_analysis/rent_sale_per_neighborhood.csv')
 nei_sale_rent = pd.read_csv(
     './rent_sale_per_neighborhood.csv')
 
@@ -197,10 +197,10 @@ st.write(f"""
 """)
 
 # Load the geojson file
-# neighborhood = gpd.GeoDataFrame.from_file(
-#     'milan_estate_analysis/milan_districts_modified.geojson')
 neighborhood = gpd.GeoDataFrame.from_file(
-    './milan_districts_modified.geojson')
+    'milan_estate_analysis/milan_districts_modified.geojson')
+# neighborhood = gpd.GeoDataFrame.from_file(
+#     './milan_districts_modified.geojson')
 
 filtered_df3 = nei_sale_rent[(nei_sale_rent['Year'] == selected_year3) &
                              (nei_sale_rent['Type'] == selected_type3) &
@@ -245,7 +245,8 @@ st.write("""
 
 
 # Read the airbnb data
-airbnb = pd.read_csv('airbnb_listings2022_modified.csv')
+# airbnb = pd.read_csv('./airbnb_listings2022_modified.csv')
+airbnb = pd.read_csv('milan_estate_analysis/airbnb_listings2022_modified.csv')
 
 # Clean up the price column
 airbnb['price'] = airbnb['price'].str.replace(
