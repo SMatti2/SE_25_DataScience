@@ -63,7 +63,6 @@ select_rent_sale = st.sidebar.selectbox(
 
 
 # FIRST PLOT
-
 filtered_df = nei_sale_rent[(nei_sale_rent['Neighborhood'] == selected_neighborhood1) & (
     nei_sale_rent['Type'] == selected_type1) & (nei_sale_rent['Status'] == selected_status1)]
 
@@ -98,6 +97,50 @@ fig.tight_layout()
 st.pyplot(fig)
 
 
+# Question: Which are the neighborhoods in which normal civil houses of normal type that during the years increased the most in terms of average sale price?
+
+st.write(f"""
+    - ### Neighborhoods Sale Prices Increase and decrease in the last 10 years
+""")
+abitazioni_civili = nei_sale_rent[(nei_sale_rent['Type'] == 'Abitazioni civili') & (
+    nei_sale_rent['Status'] == 'NORMALE')]
+avg_sale_abitazioni_civili = abitazioni_civili.groupby(
+    ['Neighborhood', 'Year'])[['Avg_Sale_Price']].mean()
+
+# Percentage increase in the average sale price between the first and last year for each neighborhood
+percentage_increase = avg_sale_abitazioni_civili.groupby('Neighborhood')[
+    ['Avg_Sale_Price']].apply(lambda x: (x.iloc[-1] - x.iloc[0]) / x.iloc[0] * 100)
+# Rename the column
+percentage_increase.rename(
+    columns={'Avg_Sale_Price': 'Percentage_Increase'}, inplace=True)
+# Sort the neighborhoods by the percentage increase
+sorted_neighborhoods = percentage_increase.sort_values(
+    by='Percentage_Increase', ascending=False)
+
+show_data2 = st.checkbox("See the raw data", key='raw_data2')
+if show_data2:
+    sorted_neighborhoods
+
+
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        fig1, ax1 = plt.subplots()
+        ax1.barh(sorted_neighborhoods.head(10).index,
+                 sorted_neighborhoods.head(10)['Percentage_Increase'])
+        ax1.set_title('Best')
+        ax1.set_xlabel('Percentage Increase')
+        st.pyplot(fig1)
+
+    with col2:
+        fig2, ax2 = plt.subplots()
+        ax2.barh(sorted_neighborhoods.tail(10).index,
+                 sorted_neighborhoods.tail(10)['Percentage_Increase'])
+        ax2.set_title('Worst')
+        ax2.set_xlabel('Percentage Increase')
+        st.pyplot(fig2)
+
+
 # SECOND PLOT & THIRD PLOT
 filtered_df2 = nei_sale_rent[(nei_sale_rent['Year'] == selected_year2) &
                              (nei_sale_rent['Type'] == selected_type2) &
@@ -119,16 +162,16 @@ year_avg_rent_sale = year_avg_rent_sale.sort_values(
 
 
 st.write(f"""
-    ### Best and worst 10 neighborhoods for rent sale rateo in {selected_year2}
+    ### Best and worst neighborhoods for rent sale rateo in {selected_year2}
 """)
-show_data2 = st.checkbox("See the raw data", key=f"year_avg_rent_sale")
-if show_data2:
+show_data3 = st.checkbox("See the raw data", key=f"raw_data3")
+if show_data3:
     year_avg_rent_sale
 
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
-        fig1, ax1 = plt.subplots(figsize=(5, 4))
+        fig1, ax1 = plt.subplots()
         ax1.bar(year_avg_rent_sale.head(10).index,
                 year_avg_rent_sale.head(10)['Rent_Sale_Rateo'])
         ax1.set_title('Best')
@@ -138,7 +181,7 @@ with st.container():
         st.pyplot(fig1)
 
     with col2:
-        fig2, ax2 = plt.subplots(figsize=(5, 4))
+        fig2, ax2 = plt.subplots()
         ax2.bar(year_avg_rent_sale.tail(10).index,
                 year_avg_rent_sale.tail(10)['Rent_Sale_Rateo'])
         ax2.set_title('Worst')
@@ -192,3 +235,9 @@ folium.Choropleth(
 
 
 folium_static(m)
+
+
+# FIFTH PLOT
+
+# Load airbnb data
+# airbnb = pd.read_csv('milan_estate_analysis/csv')
