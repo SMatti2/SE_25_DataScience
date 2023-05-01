@@ -12,10 +12,10 @@ from streamlit_folium import folium_static
 
 
 # Load data
-nei_sale_rent = pd.read_csv(
-    'milan_estate_analysis/rent_sale_per_neighborhood.csv')
 # nei_sale_rent = pd.read_csv(
-#     './rent_sale_per_neighborhood.csv')
+#     'milan_estate_analysis/rent_sale_per_neighborhood.csv')
+nei_sale_rent = pd.read_csv(
+    './rent_sale_per_neighborhood.csv')
 
 st.write("""
 # Milan's Sale and Rent Prices Analysis
@@ -100,7 +100,7 @@ st.pyplot(fig)
 # Question: Which are the neighborhoods in which normal civil houses of normal type that during the years increased the most in terms of average sale price?
 
 st.write(f"""
-    - ### Neighborhoods Sale Prices Increase and decrease in the last 10 years
+    ### Neighborhoods Sale Prices Increase and decrease in the last 10 years
 """)
 abitazioni_civili = nei_sale_rent[(nei_sale_rent['Type'] == 'Abitazioni civili') & (
     nei_sale_rent['Status'] == 'NORMALE')]
@@ -125,10 +125,10 @@ if show_data2:
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
-        fig1, ax1 = plt.subplots()
+        fig1, ax1 = plt.subplots(figsize=(8, 7))
         ax1.barh(sorted_neighborhoods.head(10).index,
                  sorted_neighborhoods.head(10)['Percentage_Increase'])
-        ax1.set_title('Best')
+        ax1.set_title('Most Increased')
         ax1.set_xlabel('Percentage Increase')
         st.pyplot(fig1)
 
@@ -136,7 +136,7 @@ with st.container():
         fig2, ax2 = plt.subplots()
         ax2.barh(sorted_neighborhoods.tail(10).index,
                  sorted_neighborhoods.tail(10)['Percentage_Increase'])
-        ax2.set_title('Worst')
+        ax2.set_title('Least Increased')
         ax2.set_xlabel('Percentage Increase')
         st.pyplot(fig2)
 
@@ -171,7 +171,7 @@ if show_data3:
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
-        fig1, ax1 = plt.subplots()
+        fig1, ax1 = plt.subplots(figsize=(8, 7))
         ax1.bar(year_avg_rent_sale.head(10).index,
                 year_avg_rent_sale.head(10)['Rent_Sale_Rateo'])
         ax1.set_title('Best')
@@ -190,17 +190,17 @@ with st.container():
         st.pyplot(fig2)
 
 
-# # FOURTH PLOT the MAP
+# FOURTH PLOT the MAP
 
 st.write(f"""
     ### {select_rent_sale} Prices in {selected_year3}
 """)
 
 # Load the geojson file
-neighborhood = gpd.GeoDataFrame.from_file(
-    'milan_estate_analysis/milan_districts_modified.geojson')
 # neighborhood = gpd.GeoDataFrame.from_file(
-#     './milan_districts_modified.geojson')
+#     'milan_estate_analysis/milan_districts_modified.geojson')
+neighborhood = gpd.GeoDataFrame.from_file(
+    './milan_districts_modified.geojson')
 
 filtered_df3 = nei_sale_rent[(nei_sale_rent['Year'] == selected_year3) &
                              (nei_sale_rent['Type'] == selected_type3) &
@@ -239,5 +239,94 @@ folium_static(m)
 
 # FIFTH PLOT
 
-# Load airbnb data
-# airbnb = pd.read_csv('milan_estate_analysis/csv')
+st.write("""
+    ### AirBnBs Earnings in 2022
+""")
+
+
+# Read the airbnb data
+airbnb = pd.read_csv('airbnb_listings2022_modified.csv')
+
+# Clean up the price column
+airbnb['price'] = airbnb['price'].str.replace(
+    ',', '').str.replace('$', '').astype(float)
+
+
+# Group the airbnb data by neighborhood and calculate the earnings
+nei_earnings_2022 = airbnb.groupby(['neighborhood_cleansed'])[
+    'price', 'availability_365'].mean().reset_index()
+
+nei_earnings_2022['yearly_earnings'] = nei_earnings_2022['price'] * \
+    (365 - nei_earnings_2022['availability_365'])
+
+show_data4 = st.checkbox("See the raw data", key='raw_data4')
+if show_data4:
+    nei_earnings_2022
+
+# Create a map of the city of Milan
+m = folium.Map(location=[45.464664, 9.188540], zoom_start=12)
+
+folium.Choropleth(
+    geo_data=neighborhood,
+    name='choropleth',
+    data=nei_earnings_2022,
+    columns=['neighborhood_cleansed', 'yearly_earnings'],
+    key_on='feature.properties.NIL',
+    fill_color='Reds',
+    fill_opacity=0.7,
+    line_opacity=0.2,
+    legend_name='Average Sale Price'
+).add_to(m)
+
+
+folium_static(m)
+
+
+# Question: Is the nightly rate of an Airbnb affected by the sale price per sqm in the neighborhood?
+
+st.write("""
+    ### Nightly rate of an Airbnb vs Sale Price per sqm
+""")
+
+# Create a dictionary to map neighborhoods to colors
+neighborhood_colors = {
+    neighborhood: color
+    for neighborhood, color in zip(
+        nei_earnings_2022['neighborhood_cleansed'].unique(),
+        sns.color_palette(n_colors=len(
+            nei_earnings_2022['neighborhood_cleansed'].unique()))
+    )
+}
+
+# Merge the airbnb data with the nei_sale_rent data
+nei_sale_rent_bnb_2022 = nei_earnings_2022.merge(
+    nei_sale_rent[nei_sale_rent['Year'] == 2022],
+    left_on='neighborhood_cleansed',
+    right_on='Neighborhood',
+    how='outer'
+).dropna()
+
+
+# Create a scatter plot with colored dots based on the neighborhood
+fig, ax = plt.subplots(figsize=(10, 8))
+for neighborhood, group in nei_sale_rent_bnb_2022.groupby('neighborhood_cleansed'):
+    ax.scatter(
+        group['Avg_Sale_Price'],
+        group['price'],
+        color=neighborhood_colors[neighborhood],
+        label=neighborhood,
+    )
+
+
+ax.set_xlabel('Sale Price per sqm')
+ax.set_ylabel('Average Price per Night')
+ax.set_title('Relationship between Airbnb Earnings and Sale Price per sqm')
+
+# Put the legend outside the plot
+ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+
+yticks = list(range(0, 401, 50)) + list(range(600, 1401, 200))
+ax.set_yticks(yticks)
+
+
+st.pyplot(fig)
